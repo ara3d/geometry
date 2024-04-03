@@ -21,7 +21,7 @@
             => new ParametricSurface(SurfaceFunctions.Cylinder, false, false);
 
         public static ParametricSurface ConicalSection(float r1, float r2)
-            => new ParametricSurface(uv => SurfaceFunctions.ConicalSection(uv, r1, r2), true, false);
+            => new ParametricSurface(uv => uv.ConicalSection(r1, r2), true, false);
 
         public static ParametricSurface Trefoil(float r)
             => new ParametricSurface(uv => SurfaceFunctions.Trefoil(uv, r), true, true);

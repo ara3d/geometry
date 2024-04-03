@@ -3,8 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>A library of functional geometry.</Description>
-    <PackageProjectUrl>https://github.com/ara3d/ara3d/tree/main/src/Ara3D.Geometry</PackageProjectUrl>
+    <Description>A C# library of geometric data structures and algorithms</Description>
+    <PackageProjectUrl>https://github.com/ara3d/geometry</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ara3d/geometry</RepositoryUrl>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(Configuration)' == 'Release'">
@@ -18,7 +19,6 @@
     <ProjectReference Include="..\..\Mathematics\Ara3D.Mathematics\Ara3D.Mathematics.csproj" />
     <ProjectReference Include="..\..\Utils\Ara3D.Utils\Ara3D.Utils.csproj" />
   </ItemGroup>
-
 
   <ItemGroup>
     <None Update="README.md">

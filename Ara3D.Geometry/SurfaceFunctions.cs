@@ -32,10 +32,10 @@ namespace Ara3D.Geometry
         public static Vector3 ConicalSection(this Vector2 uv, float r1, float r2) 
             => (uv.X.Circle3D() * r1.Lerp(r2, uv.Y)).SetZ(uv.Y);
 
-        public static Vector3 Trefoil(Vector2 uv, float r)
+        public static Vector3 Trefoil(this Vector2 uv, float r)
             => Trefoil(uv.X.Turns(), uv.Y.Turns(), r);
 
-        public static Vector3 Capsule(Vector2 uv)
+        public static Vector3 Capsule(this Vector2 uv)
         {
             uv *= (1, 2);
             if (uv.Y < 0.5) return Sphere((uv.Y, uv.X));

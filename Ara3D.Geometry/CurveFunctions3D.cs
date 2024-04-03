@@ -34,8 +34,8 @@ namespace Ara3D.Geometry
 
         // https://en.wikipedia.org/wiki/Parametric_equation#Helix
         public static Vector3 Helix(this float t, float revolutions)
-            => (t.Turns().Sin * revolutions, 
-                t.Turns().Cos * revolutions,
+            => ((t * revolutions).Turns().Sin, 
+                (t* revolutions).Turns().Cos,
                 t);
     }
 }
