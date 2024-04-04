@@ -4,6 +4,8 @@
 
 A C# library of geometric algorithms and data structures. 
 
+![Parametric-Geometry-Toolkit-Teaser](https://github.com/ara3d/geometry/assets/1759994/cd15d3bd-7dd5-4f01-9ca3-a67314a8e0e0)
+
 ## Overview
 
 This library is designed specially for parametric design and procedural geometry creation. 
