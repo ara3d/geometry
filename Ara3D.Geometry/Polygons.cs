@@ -14,6 +14,9 @@ namespace Ara3D.Geometry
 
         public Polygon Deform(Func<Vector2, Vector2> f)
             => new Polygon(Points.Select(f));
+
+        IPolygon IDeformable2D<IPolygon>.Deform(Func<Vector2, Vector2> f)
+            => Deform(f);
     }
 
     public enum CommonPolygonsEnum
@@ -30,15 +33,10 @@ namespace Ara3D.Geometry
         Dodecagon,
         Icosagon,
         Centagon,
-
+        
         // Star figures 
         Pentagram,
-        Hexagram,
-        Septagram2,
-        Septagram3,
         Octagram,
-        Eneagram2,
-        Eneagram4,
         Decagram,
     }
 

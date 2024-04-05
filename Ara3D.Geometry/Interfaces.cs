@@ -135,7 +135,7 @@ namespace Ara3D.Geometry
     public interface IPolyLine3D : IPolyLine<Vector3>, IDeformable<IPolyLine3D>
     { }
 
-    public interface IPolygon : IPolyLine2D
+    public interface IPolygon : IPolyLine2D, IDeformable2D<IPolygon>
     { }
 
     public interface IMesh<T>
