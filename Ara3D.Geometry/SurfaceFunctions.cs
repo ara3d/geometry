@@ -3,6 +3,8 @@ using Ara3D.Mathematics;
 
 namespace Ara3D.Geometry
 {
+
+
     public static class SurfaceFunctions
     {
         public static Vector3 Sphere(this Vector2 uv)
