@@ -1,141 +1,9 @@
 ﻿using Ara3D.Collections;
 using Ara3D.Mathematics;
 using Ara3D.Utils;
-using System;
 
 namespace Ara3D.Geometry
 {
-    public class TriMesh : PointsGeometry, ITriMesh, IDeformable<TriMesh>
-    {
-        public TriMesh(IArray<Vector3> points, IArray<Int3> faceIndices)
-            : base(points)
-        {
-            FaceIndices = faceIndices;
-        }
-
-        public IArray<int> Indices => FaceIndices.SelectMany(f => f.ToTuple());
-        public IArray<Int3> FaceIndices { get; }
-
-        public TriMesh Deform(Func<Vector3, Vector3> f)
-            => new TriMesh(Points.Select(f), FaceIndices);
-
-        public TriMesh Transform(Matrix4x4 mat)
-            => Deform(p => p.Transform(mat));
-
-        ITriMesh ITransformable<ITriMesh>.Transform(Matrix4x4 mat)
-            => Transform(mat);
-
-        ITriMesh IDeformable<ITriMesh>.Deform(Func<Vector3, Vector3> f)
-            => Deform(f);
-    }
-
-    public class QuadMesh : PointsGeometry, IQuadMesh, IDeformable<QuadMesh>
-    {
-        public QuadMesh(IArray<Vector3> points, IArray<Int4> faceIndices)
-            : base(points)
-        {
-            FaceIndices = faceIndices;
-        }
-        public IArray<int> Indices => FaceIndices.SelectMany(f => f.ToTuple());
-        public IArray<Int4> FaceIndices { get; }
-
-        public QuadMesh Deform(Func<Vector3, Vector3> f)
-            => new QuadMesh(Points.Select(f), FaceIndices);
-
-        public QuadMesh Transform(Matrix4x4 mat)
-            => Deform(p => p.Transform(mat));
-
-        IQuadMesh ITransformable<IQuadMesh>.Transform(Matrix4x4 mat)
-            => Transform(mat);
-
-        IQuadMesh IDeformable<IQuadMesh>.Deform(Func<Vector3, Vector3> f)
-            => Deform(f);
-    }
-
-    /// <summary>
-    /// A type of mesh, that has the topology of a grid. Even though
-    /// points might not be orthogonal, they have a forward, left, top, and right
-    /// neighbour (unless on an edge).
-    /// Grids may or may not have edges, for example a cylinder aligned to the Z-axis
-    /// would be closed on Y.
-    /// A grid mesh, may be created from a parametric surface, but can also
-    /// be treated as a parametric surface.
-    /// </summary>
-    public class GridMesh: PointsGeometry, IQuadMesh, IParametricSurface, 
-        IDeformable<GridMesh>
-    {
-        public GridMesh(IArray2D<Vector3> points, bool closedX, bool closedY)
-            : base(points)
-        {
-            Points = points;
-            ClosedX = closedX;
-            ClosedY = closedY;
-            var sd = new SurfaceDiscretization(Columns, Rows, ClosedX, ClosedY);
-            FaceIndices = sd.Indices.Evaluate();
-        }
-        public new IArray2D<Vector3> Points { get; }
-        public IArray<Int4> FaceIndices { get; }
-        public bool ClosedX { get; }
-        public bool ClosedY { get; }
-        public int Columns => Points.Columns - 1;
-        public int Rows => Points.Rows - 1;
-        public IArray<int> Indices => FaceIndices.SelectMany(f => f.ToTuple());
-        public Int4 GetFaceIndices(int column, int row) => FaceIndices[column + row * Columns];
-        public Quad GetFace(int column, int row) => this.Face(GetFaceIndices(column, row));
-
-        public Vector3 Eval(Vector2 uv)
-        {
-            Verifier.Assert(Columns >= 2);
-            Verifier.Assert(Rows >= 2);
-            var (lowerX, amountX) = GeometryUtil.InterpolateArraySize(Columns, uv.X, ClosedX);
-            var (lowerY, amountY) = GeometryUtil.InterpolateArraySize(Rows, uv.Y, ClosedY);
-            Verifier.Assert(lowerX >= 0);
-            Verifier.Assert(lowerY >= 0);
-            Verifier.Assert(lowerX < Columns - 1);
-            Verifier.Assert(lowerY < Rows - 1);
-            // TODO: the math here needs to be validated or different kinds of surfaces. 
-            var quad = GetFace(lowerX, lowerY);
-            return quad.Eval(((float)amountX, (float)amountY));
-        }
-
-        public GridMesh Deform(Func<Vector3, Vector3> f)
-            => new GridMesh(Points.Select(f), ClosedX, ClosedY);
-
-        public GridMesh Transform(Matrix4x4 mat)
-            => Deform(p => p.Transform(mat));
-
-        IQuadMesh ITransformable<IQuadMesh>.Transform(Matrix4x4 mat)
-            => Transform(mat);
-
-        IQuadMesh IDeformable<IQuadMesh>.Deform(Func<Vector3, Vector3> f)
-            => Deform(f);
-    }
-
-    public class TesselatedMesh : PointsGeometry, IQuadMesh, IDeformable<TesselatedMesh>
-    {
-        public TesselatedMesh(IArray<SurfacePoint> points, IArray<Int4> faceIndices)
-            : base(points.Select(p => p.Center))
-        {
-            Points = points;
-            FaceIndices = faceIndices;
-        }
-        public new IArray<SurfacePoint> Points { get; }
-        public IArray<int> Indices => FaceIndices.SelectMany(f => f.ToTuple());
-        public IArray<Int4> FaceIndices { get; }
-
-        public TesselatedMesh Deform(Func<Vector3, Vector3> f)
-            => new TesselatedMesh(Points.Select(p => p.Deform(f)), FaceIndices);
-
-        public TesselatedMesh Transform(Matrix4x4 mat)
-            => Deform(p => p.Transform(mat));
-
-        IQuadMesh ITransformable<IQuadMesh>.Transform(Matrix4x4 mat) 
-            => Transform(mat);
-
-        IQuadMesh IDeformable<IQuadMesh>.Deform(Func<Vector3, Vector3> f) 
-            => Deform(f);
-    }
-
     public static class Meshes
     {
         public static ITriMesh Triangle(Vector3 a, Vector3 b, Vector3 c)
@@ -191,7 +59,7 @@ namespace Ara3D.Geometry
         public static readonly QuadMesh Square
             = SquarePoints.To3D().ToQuadMesh();
 
-        public static TesselatedMesh TorusMesh(float r1, float r2, int uSegs, int vSegs)
+        public static TessellatedMesh TorusMesh(float r1, float r2, int uSegs, int vSegs)
             => ParametricSurfaces.Torus(r1, r2).Tesselate(uSegs, vSegs);
 
         public static GridMesh Extrude(this IPolyLine3D polyLine, Vector3 direction)
