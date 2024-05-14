@@ -28,18 +28,19 @@ namespace Ara3D.Geometry
             Xs = closedX ? nx.InterpolateExclusive() : nx.InterpolateInclusive();
             Ys = closedY ? ny.InterpolateExclusive() : ny.InterpolateInclusive();
             
-            Uvs = Ys.CartesianProduct(Xs, (v, u) => new Vector2(u, v));
+            Uvs = Ys.CartesianProduct(Xs, (u, v) => new Vector2(u, v));
 
-            Int4 QuadMeshFaceVertices(int row, int col)
-            {
-                var a = row * nx + col;
-                var b = row * nx + (col + 1) % nx;
-                var c = (row + 1) % ny * nx + (col + 1) % nx;
-                var d = (row + 1) % ny * nx + col;
-                return (a, b, c, d);
-            }
-
-            Indices = nRows.Range().CartesianProduct(nColumns.Range(), QuadMeshFaceVertices);
+            Indices = ny.Range().CartesianProduct(nx.Range(), (x, y) => QuadMeshFaceVertices(x, y, nColumns, nRows));
         }
+
+        public static Int4 QuadMeshFaceVertices(int col, int row, int nx, int ny)
+        {
+            var a = row * nx + col;
+            var b = row * nx + (col + 1) % nx;
+            var c = (row + 1) % ny * nx + (col + 1) % nx;
+            var d = (row + 1) % ny * nx + col;
+            return (a, b, c, d);
+        }
+
     }
 }

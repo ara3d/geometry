@@ -36,6 +36,6 @@ namespace Ara3D.Geometry
     public static class CurveExtensions
     {
         public static IArray<T> Sample<T>(this ICurve<T> self, int n)
-            => n.InterpolateInclusive().Select(self.Eval);
+            => (self.Closed ? n.InterpolateExclusive() : n.InterpolateInclusive()).Select(self.Eval);
     }
 }

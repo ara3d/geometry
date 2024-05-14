@@ -23,21 +23,27 @@ namespace Ara3D.Geometry
             Points = points;
             ClosedX = closedX;
             ClosedY = closedY;
-            var sd = new SurfaceDiscretization(Columns, Rows, ClosedX, ClosedY);
-            FaceIndices = sd.Indices.Evaluate();
+
+            var nRows = points.Rows;
+            var nColumns = points.Columns;
+            FaceIndices = nRows.Range().CartesianProduct(nColumns.Range(),
+                (col, row) => SurfaceDiscretization.QuadMeshFaceVertices(col, row, nColumns, nRows))
+                .Evaluate();
         }
         public new IArray2D<Vector3> Points { get; }
         public IArray<Int4> FaceIndices { get; }
         public bool ClosedX { get; }
         public bool ClosedY { get; }
-        public int Columns => Points.Columns - 1;
-        public int Rows => Points.Rows - 1;
         public IArray<int> Indices => FaceIndices.SelectMany(f => f.ToTuple());
-        public Int4 GetFaceIndices(int column, int row) => FaceIndices[column + row * Columns];
-        public Quad GetFace(int column, int row) => this.Face(GetFaceIndices(column, row));
+        
+        //public Int4 GetFaceIndices(int column, int row) => FaceIndices[column + row * Columns];
+        //public Quad GetFace(int column, int row) => this.Face(GetFaceIndices(column, row));
 
+        // TODO: ??
         public Vector3 Eval(Vector2 uv)
         {
+            throw new NotImplementedException();
+            /*
             Verifier.Assert(Columns >= 2);
             Verifier.Assert(Rows >= 2);
             var (lowerX, amountX) = GeometryUtil.InterpolateArraySize(Columns, uv.X, ClosedX);
@@ -49,6 +55,7 @@ namespace Ara3D.Geometry
             // TODO: the math here needs to be validated or different kinds of surfaces. 
             var quad = GetFace(lowerX, lowerY);
             return quad.Eval(((float)amountX, (float)amountY));
+            */
         }
 
         public GridMesh Deform(Func<Vector3, Vector3> f)

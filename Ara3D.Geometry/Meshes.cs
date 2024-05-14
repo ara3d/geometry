@@ -78,12 +78,12 @@ namespace Ara3D.Geometry
             => a.To3D().Rule(b.To3D());
 
         public static GridMesh Rule(this IPolyLine3D a, IPolyLine3D b)
-            => a.Points.QuadStrip(b.Points, a.Closed, false);
+            => a.Points.QuadStrip(b.Points, a.Closed);
 
-        public static GridMesh QuadStrip(this IArray<Vector3> lower, IArray<Vector3> upper, bool closedX, bool doubleSided)
+        public static GridMesh QuadStrip(this IArray<Vector3> lower, IArray<Vector3> upper, bool closedX)
         {
             Verifier.Assert(lower.Count == upper.Count);
-            return new GridMesh(Array2D.Create(lower, upper), closedX, doubleSided);
+            return new GridMesh(Array2D.Create(lower, upper), closedX, false);
         }
      }
 }
