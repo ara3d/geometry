@@ -24,10 +24,10 @@ namespace Ara3D.Geometry
             ClosedX = closedX;
             ClosedY = closedY;
 
-            var nRows = points.Rows;
-            var nColumns = points.Columns;
-            FaceIndices = nRows.Range().CartesianProduct(nColumns.Range(),
-                (col, row) => SurfaceDiscretization.QuadMeshFaceVertices(col, row, nColumns, nRows))
+            var nx = points.Columns - (closedX ? 0 : 1);
+            var ny = points.Rows - (closedY ? 0 : 1);
+            FaceIndices = ny.Range().CartesianProduct(nx.Range(),
+                (col, row) => SurfaceDiscretization.QuadMeshFaceVertices(col, row, points.Columns, points.Rows))
                 .Evaluate();
         }
         public new IArray2D<Vector3> Points { get; }

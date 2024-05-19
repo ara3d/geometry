@@ -30,7 +30,7 @@ namespace Ara3D.Geometry
             
             Uvs = Ys.CartesianProduct(Xs, (u, v) => new Vector2(u, v));
 
-            Indices = ny.Range().CartesianProduct(nx.Range(), (x, y) => QuadMeshFaceVertices(x, y, nColumns, nRows));
+            Indices = nRows.Range().CartesianProduct(nColumns.Range(), (x, y) => QuadMeshFaceVertices(x, y, nx, ny));
         }
 
         public static Int4 QuadMeshFaceVertices(int col, int row, int nx, int ny)
