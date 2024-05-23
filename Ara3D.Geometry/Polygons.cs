@@ -12,11 +12,11 @@ namespace Ara3D.Geometry
             : base(points, true)
         { }
 
-        public Polygon Deform(Func<Vector2, Vector2> f)
+        public Polygon Deform2D(Func<Vector2, Vector2> f)
             => new Polygon(Points.Select(f));
 
-        IPolygon IDeformable2D<IPolygon>.Deform(Func<Vector2, Vector2> f)
-            => Deform(f);
+        IPolygon IDeformable2D<IPolygon>.Deform2D(Func<Vector2, Vector2> f)
+            => Deform2D(f);
     }
 
     public enum CommonPolygonsEnum

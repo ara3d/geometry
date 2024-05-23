@@ -1,6 +1,5 @@
 ﻿using Ara3D.Collections;
 using Ara3D.Mathematics;
-using Ara3D.Utils;
 using System;
 
 namespace Ara3D.Geometry

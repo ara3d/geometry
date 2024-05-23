@@ -31,7 +31,7 @@ namespace Ara3D.Geometry
     public interface IDeformable2D<out T>
         where  T: IDeformable2D<T>
     {
-        T Deform(Func<Vector2, Vector2> f);
+        T Deform2D(Func<Vector2, Vector2> f);
     }
 
     public interface IGeometry : 

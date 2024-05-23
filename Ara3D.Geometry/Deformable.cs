@@ -7,10 +7,10 @@ namespace Ara3D.Geometry
     {
         public static T Translate<T>(this T self, Vector2 vector) 
             where T : IDeformable2D<T>
-            => self.Deform(x => x + vector);
+            => self.Deform2D(x => x + vector);
 
         public static T Scale<T>(this T self, Vector2 vector) 
             where T : IDeformable2D<T>
-            => self.Deform(x => x * vector);
+            => self.Deform2D(x => x * vector);
     }
 }

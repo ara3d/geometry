@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Ara3D.Collections;
 using Ara3D.Mathematics;
@@ -19,16 +20,20 @@ namespace Ara3D.Geometry
         public static IArray<Vector3> Normalize(this IArray<Vector3> vectors)
             => vectors.Select(v => v.Normalize());
 
-        public static bool SequenceAlmostEquals(this IArray<Vector3> vs1, IArray<Vector3> vs2, float tolerance = Constants.Tolerance)
+        public static bool SequenceAlmostEquals(this IArray<Vector3> vs1, IArray<Vector3> vs2,
+            float tolerance = Constants.Tolerance)
             => vs1.Count == vs2.Count && vs1.Indices().All(i => vs1[i].AlmostEquals(vs2[i], tolerance));
 
-        public static bool AreColinear(this IEnumerable<Vector3> vectors, Vector3 reference, float tolerance = (float)Constants.OneTenthOfADegree)
+        public static bool AreColinear(this IEnumerable<Vector3> vectors, Vector3 reference,
+            float tolerance = (float)Constants.OneTenthOfADegree)
             => !reference.IsNaN() && vectors.All(v => v.Colinear(reference, tolerance));
 
-        public static bool AreColinear(this IEnumerable<Vector3> vectors, float tolerance = (float)Constants.OneTenthOfADegree)
+        public static bool AreColinear(this IEnumerable<Vector3> vectors,
+            float tolerance = (float)Constants.OneTenthOfADegree)
             => vectors.ToList().AreColinear(tolerance);
 
-        public static bool AreColinear(this System.Collections.Generic.IList<Vector3> vectors, float tolerance = (float)Constants.OneTenthOfADegree)
+        public static bool AreColinear(this System.Collections.Generic.IList<Vector3> vectors,
+            float tolerance = (float)Constants.OneTenthOfADegree)
             => vectors.Count <= 1 || vectors.Skip(1).AreColinear(vectors[0], tolerance);
 
         public static AABox BoundingBox(this IArray<Vector3> vertices)
@@ -74,8 +79,8 @@ namespace Ara3D.Geometry
             else
             {
                 return (v.X < v.Z)
-                     ? new Int3(v.Y, v.X, v.Z)
-                     : (v.Y < v.Z)
+                    ? new Int3(v.Y, v.X, v.Z)
+                    : (v.Y < v.Z)
                         ? new Int3(v.Y, v.Z, v.X)
                         : new Int3(v.Z, v.Y, v.X);
             }
@@ -83,62 +88,65 @@ namespace Ara3D.Geometry
 
         // Fins the intersection between two lines.
         // Returns true if they intersect
-        // t and u are the distances of the intersection point along the two line
-        public static bool LineLineIntersection(Vector2 line1Origin, Vector2 line1Direction, Vector2 line2Origin, Vector2 line2Direction, out float t, out float u, float epsilon = 0.01f)
+        // References:
+        // https://www.codeproject.com/Tips/862988/Find-the-Intersection-Point-of-Two-Line-Segments
+        // https://gist.github.com/unitycoder/10241239e080720376830f84511ccd3c
+        // https://en.m.wikipedia.org/wiki/Line%E2%80%93line_intersection#Given_two_points_on_each_line
+        // https://stackoverflow.com/questions/4543506/algorithm-for-intersection-of-2-lines
+        public static bool Intersection(this Line2D line1, Line2D line2, out Vector2 point, float epsilon = 0.000001f)
         {
-            var line1P2 = line1Origin + line1Direction;
-            var line2P2 = line2Origin + line2Direction;
 
-            var x1 = line1Origin.X;
-            var y1 = line1Origin.Y;
-            var x2 = line1P2.X;
-            var y2 = line1P2.Y;
-            var x3 = line2Origin.X;
-            var y3 = line2Origin.Y;
-            var x4 = line2P2.X;
-            var y4 = line2P2.Y;
+            var x1 = line1.A.X;
+            var y1 = line1.A.Y;
+            var x2 = line1.B.X;
+            var y2 = line1.B.Y;
+            var x3 = line2.A.X;
+            var y3 = line2.A.Y;
+            var x4 = line2.B.X;
+            var y4 = line2.B.Y;
 
             var denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
 
             if (denominator.Abs() < epsilon)
             {
-                t = 0.0f;
-                u = 0.0f;
+                point = Vector2.Zero;
                 return false;
             }
 
-            var tNeumerator = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4);
-            var uNeumerator = (x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3);
-
-            t = tNeumerator / denominator;
-            u = -uNeumerator / denominator;
+            var num1 = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4);
+            var num2 = (x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3);
+            var t1 = num1 / denominator;
+            var t2 = -num2 / denominator;
+            var p1 = line1.Lerp(t1);
+            var p2 = line2.Lerp(t2);
+            point = p1.Average(p2);
 
             return true;
         }
 
         // Returns the distance between two lines
         // t and u are the distances if the intersection points along the two lines 
-        public static float LineLineDistance(Vector2 line1A, Vector2 line1B, Vector2 line2A, Vector2 line2B, out float t, out float u, float epsilon = 0.0000001f)
+        public static float LineLineDistance(Line2D line1, Line2D line2, out float t, out float u, float epsilon = 0.0000001f)
         {
-            var x1 = line1A.X;
-            var y1 = line1A.Y;
-            var x2 = line1B.X;
-            var y2 = line1B.Y;
-            var x3 = line2A.X;
-            var y3 = line2A.Y;
-            var x4 = line2B.X;
-            var y4 = line2B.Y;
+            var x1 = line1.A.X;
+            var y1 = line1.A.Y;
+            var x2 = line1.B.X;
+            var y2 = line1.B.Y;
+            var x3 = line2.A.X;
+            var y3 = line2.A.Y;
+            var x4 = line2.B.X;
+            var y4 = line2.B.Y;
 
             var denominator = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
 
             if (denominator.Abs() >= epsilon)
             {
                 // Lines are not parallel, they should intersect nicely
-                var tNeumerator = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4);
-                var uNeumerator = (x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3);
+                var num1 = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4);
+                var num2 = (x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3);
 
-                t = tNeumerator / denominator;
-                u = -uNeumerator / denominator;
+                t = num1 / denominator;
+                u = -num2 / denominator;
 
                 var e = 0.0;
                 if (t >= -e && t <= 1.0 + e && u >= -e && u <= 1.0 + e)
@@ -152,28 +160,28 @@ namespace Ara3D.Geometry
             // Parallel or non intersecting lines - default to point to line checks
 
             u = 0.0f;
-            var minDistance = LinePointDistance(line1A, line1B, line2A, out t);
-            var distance = LinePointDistance(line1A, line1B, line2B, out var closestPoint);
+            var minDistance = Distance(line1, line2.A, out t);
+            var distance = Distance(line1, line2.B, out var amount);
             if (distance < minDistance)
             {
                 minDistance = distance;
-                t = closestPoint;
+                t = amount;
                 u = 1.0f;
             }
 
-            distance = LinePointDistance(line2A, line2B, line1A, out closestPoint);
+            distance = Distance(line2, line1.A, out amount);
             if (distance < minDistance)
             {
                 minDistance = distance;
-                u = closestPoint;
+                u = amount;
                 t = 0.0f;
             }
 
-            distance = LinePointDistance(line2A, line2B, line1B, out closestPoint);
+            distance = Distance(line2, line1.B, out amount);
             if (distance < minDistance)
             {
                 minDistance = distance;
-                u = closestPoint;
+                u = amount;
                 t = 1.0f;
             }
 
@@ -182,57 +190,75 @@ namespace Ara3D.Geometry
 
         // Returns the distance between a line and a point.
         // t is the distance along the line of the closest point
-        public static float LinePointDistance(Vector2 v, Vector2 w, Vector2 p, out float t)
+        public static float Distance(this Line2D line, Vector2 p, out float t)
         {
+            var (a, b) = line;
+
             // Return minimum distance between line segment vw and point p
-            var l2 = (v - w).LengthSquared();  // i.e. |w-v|^2 -  avoid a sqrt
-            if (l2 == 0.0f)  // v == w case
+            var l2 = (a - b).LengthSquared(); // i.e. |w-v|^2 -  avoid a sqrt
+            if (l2 == 0.0f) // v == w case
             {
                 t = 0.5f;
-                return (p - v).Length();
+                return (p - a).Length();
             }
 
             // Consider the line extending the segment, parameterized as v + t (w - v).
             // We find projection of point p onto the line. 
             // It falls where t = [(p-v) . (w-v)] / |w-v|^2
             // We clamp t from [0,1] to handle points outside the segment vw.
-            t = ((p - v).Dot(w - v) / l2).Clamp(0.0f, 1.0f);
-            var closestPoint = v + t * (w - v);  // Projection falls on the segment
+            t = ((p - a).Dot(b - a) / l2).Clamp(0.0f, 1.0f);
+            var closestPoint = a + t * (b - a); // Projection falls on the segment
             return (p - closestPoint).Length();
         }
-
-
-        /// <summary>
-        /// Given an array size, and a value from 0 to 1.0 indicate a relative position on the array will return
-        /// The lower bounding index (upper bound is index + 1) and a new value from 0 to 1.0 for the purpose of interpolation.
-        /// If the value is out of bounds the array is either treated as circular, or the first or last pair of
-        /// values.  
-        /// </summary>
-        public static (int, double) InterpolateArraySize(int count, double amount, bool circular)
+        
+        public static IArray<Vector2> Offset(this IArray<Vector2> points, float offset, bool closed)
         {
-            if (count < 2) throw new Exception("Can only interpolate arrays of size 2 or more");
-            var n = circular ? count + 1 : count;
-            var index = n * amount;
-            var lower = Math.Floor(index);
-            var upper = Math.Ceiling(index);
-            if (!circular)
+            if (points.Count < 2) return LinqArray.Empty<Vector2>();
+            var lines = points.ToLines(closed).Select(line => line.ParallelOffset(offset));
+            var r = new List<Vector2>();
+            var n = lines.Count - (closed ? 0 : 1);
+
+            if (!closed)
             {
-                // We need to clamp the lower index and the upper index
-                if (lower < 0)
+                r.Add(lines[0].A);
+            }
+
+            for (var i = 0; i < n; ++i)
+            {
+                var line1 = lines[i];
+                var line2 = lines.ElementAtModulo(i + 1);
+                var intersects = line1.Intersection(line2, out var intersection);
+                if (intersects)
                 {
-                    var delta = -lower;
-                    lower += delta;
-                    //upper += delta;
+                    // They interesect
+                    r.Add(intersection);
                 }
-                else if (upper >= count)
+                else
                 {
-                    var delta = upper - (count - 1);
-                    lower -= delta;
-                    //upper -= delta;
+                    // NOTE: this should be exceedingly rare or impossible.
+                    // We probably have virtually coincident points, or maybe a bug in the line algorithm.
+                    Debugger.Break();
+
+                    // If we couldn't determine an intersection point 
+                    // Add the end of the first line, and the beginning of the next
+                    r.Add(line1.B);
+                    r.Add(line2.A);
                 }
             }
-            var rel = (index - lower);
-            return ((int)lower, rel);
+
+            if (!closed)
+            {
+                r.Add(lines.Last().B);
+            }
+
+            return r.ToIArray();
         }
+
+        public static IPolyLine2D Offset(this IPolyLine2D self, float amount = 1f)
+            => self.Points.Offset(amount, self.Closed).ToPolyLine2D(self.Closed);
+
+        public static IArray<Line2D> ToLines(this IArray<Vector2> points, bool closed)
+            => (points.Count - (closed ? 0 : 1)).Range()
+                .Select(i => new Line2D(points[i], points.ElementAtModulo(i + 1)));
     }
 }
