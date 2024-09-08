@@ -15,7 +15,7 @@ namespace Ara3D.Geometry
         {
             var r = (q * t).Cos + 2;
             var x = r * (p * t).Cos;
-            var y = r * (p * t).Sin;
+            var y = r * (p * t).Sin;    
             var z = -(q * t).Sin;
             return (x, y, z);
         }
