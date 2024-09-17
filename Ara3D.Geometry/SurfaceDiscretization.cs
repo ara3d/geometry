@@ -5,32 +5,31 @@ namespace Ara3D.Geometry
 {
     /// <summary>
     /// This class is used for sampling parameterized surfaces and computing quad-mesh strip indices.
-    /// Note that the members are computed on demand, so be careful about over-computation. 
-    /// x == column == u, y == row == v
+    /// column == u (x), row == v (y)
     /// </summary>
     public class SurfaceDiscretization
     {
-        public IArray<float> Xs { get; }
-        public IArray<float> Ys { get; }
+        public IArray<float> Us { get; }
+        public IArray<float> Vs { get; }
         public IArray2D<Vector2> Uvs { get; }
-        public bool ClosedX { get; }
-        public bool ClosedY { get; }
-        public IArray2D<Int4> Indices { get; }
+        public bool ClosedU { get; }
+        public bool ClosedV { get; }
+        public IArray2D<Int4> QuadIndices { get; }
 
-        public SurfaceDiscretization(int nColumns, int nRows, bool closedX, bool closedY)
+        public SurfaceDiscretization(int nColumns, int nRows, bool closedU, bool closedV)
         {
-            ClosedX = closedX;
-            ClosedY = closedY;
+            ClosedU = closedU;
+            ClosedV = closedV;
             
-            var nx = nColumns + (closedX ? 0 : 1);
-            var ny = nRows + (closedY ? 0 : 1);
+            var nx = nColumns + (closedU ? 0 : 1);
+            var ny = nRows + (closedV ? 0 : 1);
 
-            Xs = closedX ? nx.InterpolateExclusive() : nx.InterpolateInclusive();
-            Ys = closedY ? ny.InterpolateExclusive() : ny.InterpolateInclusive();
+            Us = closedU ? nx.InterpolateExclusive() : nx.InterpolateInclusive();
+            Vs = closedV ? ny.InterpolateExclusive() : ny.InterpolateInclusive();
             
-            Uvs = Ys.CartesianProduct(Xs, (u, v) => new Vector2(u, v));
+            Uvs = Vs.CartesianProduct(Us, (u, v) => new Vector2(u, v));
 
-            Indices = nRows.Range().CartesianProduct(nColumns.Range(), (x, y) => QuadMeshFaceVertices(x, y, nx, ny));
+            QuadIndices = nRows.Range().CartesianProduct(nColumns.Range(), (x, y) => QuadMeshFaceVertices(x, y, nx, ny));
         }
 
         public static Int4 QuadMeshFaceVertices(int col, int row, int nx, int ny)

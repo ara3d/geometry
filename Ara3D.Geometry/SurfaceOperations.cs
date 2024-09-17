@@ -31,17 +31,7 @@ namespace Ara3D.Geometry
         public static IParametricSurface Extrude(this ICurve3D profile, Vector3 vector)
             => Create((uv) => profile.Eval(uv.X).LerpAlongVector(vector, uv.Y), profile.Closed, false);
 
-
         public static float Epsilon => 1 / 1000000f;
-
-        public static SurfacePoint GetPoint(this IParametricSurface parametricSurface, Vector2 uv)
-            => new SurfacePoint(
-                parametricSurface.Eval(uv),
-                uv,
-                parametricSurface.Eval(uv + (0, Epsilon)),
-                parametricSurface.Eval(uv + (Epsilon, 0)),
-                parametricSurface.Eval(uv + (0, -Epsilon)),
-                parametricSurface.Eval(uv + (-Epsilon, 0)));
 
         public static Vector3 GetNormal(this IParametricSurface parametricSurface, Vector2 uv)
         {
@@ -58,8 +48,8 @@ namespace Ara3D.Geometry
         public static TessellatedMesh Tesselate(this IParametricSurface parametricSurface, int cols, int rows = 0)
         {
             var discreteSurface = new SurfaceDiscretization(cols, rows, parametricSurface.ClosedX, parametricSurface.ClosedY);
-            var vertices = discreteSurface.Uvs.Select(parametricSurface.GetPoint).Evaluate();
-            var faceVertices = discreteSurface.Indices.Evaluate();
+            var vertices = discreteSurface.Uvs.Select(parametricSurface.Eval).Evaluate();
+            var faceVertices = discreteSurface.QuadIndices.Evaluate();
             return new TessellatedMesh(vertices, faceVertices);
         }
     }
