@@ -21,15 +21,16 @@ namespace Ara3D.Geometry
             ClosedU = closedU;
             ClosedV = closedV;
             
-            var nx = nColumns + (closedU ? 0 : 1);
-            var ny = nRows + (closedV ? 0 : 1);
+            Us = closedU 
+                ? nColumns.InterpolateInclusive()
+                : (nColumns + 1).InterpolateInclusive();
+            Vs = closedV
+                ? nColumns.InterpolateInclusive()
+                : (nColumns + 1).InterpolateInclusive();
 
-            Us = closedU ? nx.InterpolateExclusive() : nx.InterpolateInclusive();
-            Vs = closedV ? ny.InterpolateExclusive() : ny.InterpolateInclusive();
-            
             Uvs = Vs.CartesianProduct(Us, (u, v) => new Vector2(u, v));
-
-            QuadIndices = nRows.Range().CartesianProduct(nColumns.Range(), (x, y) => QuadMeshFaceVertices(x, y, nx, ny));
+            
+            QuadIndices = nRows.Range().CartesianProduct(nColumns.Range(), (y, x) => QuadMeshFaceVertices(x, y, Us.Count, Vs.Count));
         }
 
         public static Int4 QuadMeshFaceVertices(int col, int row, int nx, int ny)
