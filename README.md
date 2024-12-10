@@ -1,4 +1,4 @@
-### ARCHIVED: this library is being replaced by [https://github.com/ara3d/Plato.Geometry](Plato.Geometry)
+### DEPRECATED: this library is being replaced by [https://github.com/ara3d/Plato.Geometry](Plato.Geometry)
 
 <hr/>
 
